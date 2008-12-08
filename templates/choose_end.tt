@@ -4,6 +4,8 @@
 
 <h1>Heading where?</h1>
 
+<p>From <b>[% start_place.name | html %]</b> to:</p>
+
 <ul>
 [% FOR place IN places %]
 <li><a href="[%current_uri | html%]&e=[% place.id | url %]">[% place.name | html %]</a></li>

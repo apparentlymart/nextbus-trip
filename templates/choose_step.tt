@@ -10,7 +10,7 @@
 
 <ul>
 [% FOR choice IN choices %]
-<li><a href="[%choice.url | html%]">[% choice.desc | html %]</a> (arrive [% choice.arrive_time | html %])</li>
+<li><a href="[%choice.url | html%]">[% choice.desc | html %] <small>(arrive [% choice.arrive_time | html %])</small></a></li>
 [% END %]
 </ul>
 [% ELSE %]

@@ -1,6 +1,8 @@
 <html>
 <head>
 <title>[% title | html %]</title>
+<link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+<link rel="stylesheet" type="text/css" href="mobile.css" media="handheld" />
 </head>
 
 <body>
