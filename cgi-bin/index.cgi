@@ -85,7 +85,7 @@ foreach my $route (@$routes) {
     next if ($first_steps_used{$first_step_desc});
 
     my $next_place = $first_step->end_place;
-    my $next_url = "/?s=".$next_place->id."&e=".$end_place->id;
+    my $next_url = "./?s=".$next_place->id."&e=".$end_place->id;
 
     push @choices, {
         url => $next_url,
