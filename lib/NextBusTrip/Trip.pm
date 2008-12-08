@@ -37,7 +37,7 @@ sub sensible_routes {
     my $routes = $self->routes;
 
     $routes = [ grep { ! $_->is_ridiculous } @{$routes} ];
-    $routes = [ sort { $a->arrival_time <=> $b->arrival_time } @{$routes} ];
+    $routes = [ sort { ($a->arrival_time <=> $b->arrival_time) || ($a->wait <=> $b->wait) } @{$routes} ];
 
     return $routes;
 }

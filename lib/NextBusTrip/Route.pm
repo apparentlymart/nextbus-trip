@@ -130,6 +130,14 @@ sub wait_and_arrival_time {
     return $self->{wait_times}{$start_time} = $wait, $self->{arrival_times}{$start_time} = $arrival_time;
 }
 
+sub wait {
+    my ($self) = @_;
+
+    my ($wait, $arrival_time) = $self->wait_and_arrival_time;
+
+    return $wait;
+}
+
 sub arrival_time {
     my ($self) = @_;
 
