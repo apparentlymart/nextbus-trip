@@ -95,8 +95,6 @@ sub refresh_predictions {
         if ($res->is_success) {
             my $xml = $res->content;
 
-            print STDERR $xml."\n";
-
             eval {
                 my $xp = XML::XPath->new(xml => $xml);
 

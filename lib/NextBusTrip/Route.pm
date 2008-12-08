@@ -39,6 +39,10 @@ sub prepend_route {
     return $self;
 }
 
+sub first_step {
+    return $_[0]->hops->[0];
+}
+
 sub first_step_in_english {
     my ($self) = @_;
 

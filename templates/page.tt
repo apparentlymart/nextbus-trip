@@ -1,0 +1,11 @@
+<html>
+<head>
+<title>[% title | html %]</title>
+</head>
+
+<body>
+
+[% content %]
+
+</body>
+</html>

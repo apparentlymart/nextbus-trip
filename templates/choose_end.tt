@@ -1,0 +1,13 @@
+[% WRAPPER page.tt
+   title = "Trips from $start_place.name"
+%]
+
+<h1>Heading where?</h1>
+
+<ul>
+[% FOR place IN places %]
+<li><a href="[%current_uri | html%]&e=[% place.id | url %]">[% place.name | html %]</a></li>
+[% END %]
+</ul>
+
+[% END %]

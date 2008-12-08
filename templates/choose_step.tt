@@ -1,0 +1,34 @@
+[% WRAPPER page.tt
+   title = "To $end_place.name from $start_place.name"
+%]
+
+[% IF choices.size %]
+
+<h1>What next?</h1>
+
+<p>From <b>[% start_place.name | html %]</b>:</p>
+
+<ul>
+[% FOR choice IN choices %]
+<li><a href="[%choice.url | html%]">[% choice.desc | html %]</a> (arrive [% choice.arrive_time | html %])</li>
+[% END %]
+</ul>
+[% ELSE %]
+
+[% IF start_place.id == end_place.id %]
+
+<h1>You're there!</h1>
+
+<p>Stay right where you are.</p>
+
+[% ELSE %]
+
+<h1>Epic Fail</h1>
+
+<p>I got nothin'.</p>
+
+[% END %]
+
+[% END %]
+
+[% END %]

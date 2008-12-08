@@ -1,0 +1,14 @@
+[% WRAPPER page.tt
+   title = "NextBus Trip"
+%]
+
+<h1>Where are you?</h1>
+
+<ul>
+[% FOR place IN places %]
+<li><a href="[%current_uri | html%]?s=[% place.id | url %]">[% place.name | html %]</a></li>
+[% END %]
+</ul>
+
+[% END %]
+
