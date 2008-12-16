@@ -13,7 +13,7 @@ __PACKAGE__->has_many(incoming_hops => 'NextBusTrip::Hop', 'end_place_id');
 __PACKAGE__->has_many(bus_stops => 'NextBusTrip::BusStop', 'place_id');
 
 sub find_routes_to {
-    my ($self, $end_place, $seen_hops) = @_;
+    my ($self, $end_place, $previous_hop) = @_;
 
     my @options = $self->options(end_place_id => $end_place);
 
@@ -27,12 +27,13 @@ sub find_routes_to {
         my $next_place = $next_hop->end_place;
 
         next if $seen_hops{$next_hop->id};
+        next if defined($previous_hop) && $previous_hop->is_walking && $next_hop->is_walking;
 
         $route->add_hop($next_hop);
         $seen_hops{$next_hop->id} = 1;
 
         if ($next_place->id != $end_place->id) {
-            my $next_routes = $next_place->find_routes_to($end_place);
+            my $next_routes = $next_place->find_routes_to($end_place, $next_hop);
             foreach my $next_route (@$next_routes) {
                 push @ret, $next_route->prepend_route($route);
             }

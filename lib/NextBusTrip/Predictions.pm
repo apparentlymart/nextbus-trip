@@ -19,7 +19,6 @@ sub get_next_departure {
     my $ret = undef;
     if ($predictions) {
         foreach my $prediction (@$predictions) {
-            # Predictions are stored as a number of seconds since fetch.
             my $predicted_time = $prediction->[0];
             my $dir = $prediction->[1];
 
@@ -37,6 +36,31 @@ sub get_next_departure {
     $ret = 2147483647 unless $ret;
 
     return $ret;
+
+}
+
+sub get_all_departures {
+    my ($class, $agency, $route, $stop_id, $earliest_time, $filtered_dirs) = @_;
+
+    my %filtered_dirs = ();
+    map { $filtered_dirs{$_} = 1 } @$filtered_dirs if $filtered_dirs;
+
+    my $predictions = $predictions{$agency}{"$route\t$stop_id"};
+
+    my @ret = ();
+    if ($predictions) {
+        foreach my $prediction (@$predictions) {
+            my $predicted_time = $prediction->[0];
+            my $dir = $prediction->[1];
+
+            next if $filtered_dirs{$dir};
+            next if $predicted_time < $earliest_time;
+
+            push @ret, $predicted_time;
+        }
+    }
+
+    return @ret;
 
 }
 

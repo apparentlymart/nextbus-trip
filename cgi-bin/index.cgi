@@ -79,23 +79,35 @@ my @choices = ();
 foreach my $route (@$routes) {
 
     my $first_step = $route->first_step;
-    my $first_step_desc = $route->first_step_in_english_with_time;
-    my $arrival_time = $route->arrival_time_in_english;
-
-    next if ($first_steps_used{$first_step_desc});
 
     my $next_place = $first_step->end_place;
     my $next_url = "./?s=".$next_place->id."&e=".$end_place->id;
 
-    push @choices, {
-        url => $next_url,
-        desc => ucfirst($first_step_desc),
-        arrive_time => $arrival_time,
-    };
+    my $initial_walk_time = $route->initial_walk_time;
 
-    $first_steps_used{$first_step_desc} = 1;
+    foreach my $possible ($route->all_waits_and_arrival_times) {
+        my ($wait, $arrival_time, $first_step_desc, $arrival_time_in_english) = @$possible;
+
+        next if ($first_steps_used{$first_step_desc});
+
+        push @choices, {
+            url => $next_url,
+            desc => ucfirst($first_step_desc),
+            arrive_time => $arrival_time_in_english,
+            arrive_time_unix => $arrival_time,
+            initial_walk_time => $initial_walk_time,
+        };
+
+        $first_steps_used{$first_step_desc} = 1;
+
+    }
+
 
 }
+
+@choices = sort {
+    $a->{arrive_time_unix} <=> $b->{arrive_time_unix} || $a->{initial_walk_time} <=> $b->{initial_walk_time}
+} @choices;
 
 $t->process("choose_step.tt", {
     choices => \@choices,

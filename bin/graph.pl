@@ -6,7 +6,7 @@ use Data::Dumper;
 
 print STDERR "Graph of all hops\n";
 
-my $end_place = NextBusTrip::Place->retrieve(1);
+my $end_place = NextBusTrip::Place->retrieve(20);
 
 print STDERR "Highlighting routes to ", $end_place->name, "\n";
 

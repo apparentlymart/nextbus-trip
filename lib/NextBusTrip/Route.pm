@@ -76,6 +76,14 @@ sub first_step_in_english_with_time {
     return ($wait > 0 ? "at $leave_time (${wait}min), " : '').$self->first_step_in_english;
 }
 
+sub initial_walk_time {
+    my ($self) = @_;
+
+    my $first_hop = $self->first_hop;
+
+    return $first_hop->is_walking ? $first_hop->duration : 0;
+}
+
 sub arrival_time_in_english {
     my ($self) = @_;
 
@@ -130,6 +138,61 @@ sub wait_and_arrival_time {
     return $self->{wait_times}{$start_time} = $wait, $self->{arrival_times}{$start_time} = $arrival_time;
 }
 
+sub all_waits_and_arrival_times {
+    my ($self, $start_time) = @_;
+
+    # This is kinda hacky, since I'm shoe-horning support for multiple
+    # departures in after the fact. Whatever.
+
+    $start_time ||= time();
+
+    my $first_hop = $self->hops->[0];
+    my $second_hop = $self->hops->[1];
+    my $base_delay = 0;
+    my $predictions_hop = undef;
+
+    if ($first_hop->is_walking && $second_hop) {
+        $base_delay = $first_hop->duration;
+        $start_time += $base_delay;
+        $predictions_hop = $second_hop;
+    }
+    else {
+        $predictions_hop = $first_hop;
+    }
+
+    my @predictions = $predictions_hop->all_departure_times;
+    use Data::Dumper;
+    print STDERR Data::Dumper::Dumper(\@predictions);
+
+    my @ret = ();
+
+    foreach my $p_start_time (@predictions) {
+        # Now we just call into the singular wait_and_arrival_time
+        # method using the prediction start time - 1 as the start time,
+        # guaranteeing that we'll get back the wait and arrival time
+        # for that particular prediction.
+        # (This is the really hacky part.)
+
+        my $start_time_offset = $p_start_time - $start_time;
+        my ($wait, $arrival_time) = $self->wait_and_arrival_time($p_start_time - 1);
+
+        next if $self->_time_is_ridiculous($arrival_time);
+
+        $wait += $start_time_offset;
+        #$wait -= $base_delay;
+
+        my $leave_time = format_time($start_time + $wait);
+
+        my $wait_minutes = int($wait / 60);
+
+        my $desc = ($wait_minutes > 0 ? "at $leave_time (${wait_minutes}min), " : '').$self->first_step_in_english;
+
+        push @ret, [ $wait, $arrival_time, $desc, format_time($arrival_time) ];
+    }
+
+    return @ret;
+}
+
 sub wait {
     my ($self) = @_;
 
@@ -150,6 +213,12 @@ sub is_ridiculous {
     my ($self) = @_;
 
     my $arrival_time = $self->arrival_time;
+
+    return $self->_time_is_ridiculous($arrival_time);
+}
+
+sub _time_is_ridiculous {
+    my ($self, $arrival_time) = @_;
 
     # Bus trips without nextbus predictions return the timestamp of the
     # end of UNIX time, so any route that ends on or after that instant

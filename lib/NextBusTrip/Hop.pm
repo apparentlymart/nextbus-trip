@@ -30,6 +30,26 @@ sub next_departure_time {
 
 }
 
+sub all_departure_times {
+    my ($self, $earliest) = @_;
+
+    $earliest ||= time();
+
+    my $nextbus_stop_id = $self->nextbus_stop_id;
+
+    if ($nextbus_stop_id) {
+        my $agency = $self->bus_agency;
+        my $route = $self->bus_route;
+        my $filtered_dirs = $self->filter_dirs ? [ split(',', $self->filter_dirs) ] : undef;
+
+        return NextBusTrip::Predictions->get_all_departures($self->bus_agency, $self->bus_route, $nextbus_stop_id, $earliest, $filtered_dirs);
+    }
+    else {
+        return ($earliest);
+    }
+
+}
+
 sub next_arrival_time {
     my ($self, $earliest_departure) = @_;
 
