@@ -161,8 +161,6 @@ sub all_waits_and_arrival_times {
     }
 
     my @predictions = $predictions_hop->all_departure_times;
-    use Data::Dumper;
-    print STDERR Data::Dumper::Dumper(\@predictions);
 
     my @ret = ();
 
@@ -179,7 +177,7 @@ sub all_waits_and_arrival_times {
         next if $self->_time_is_ridiculous($arrival_time);
 
         $wait += $start_time_offset;
-        #$wait -= $base_delay;
+        $wait += $base_delay;
 
         my $leave_time = format_time($start_time + $wait);
 
