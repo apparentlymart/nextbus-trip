@@ -94,7 +94,7 @@ sub refresh_predictions {
         my $cookie = undef;
         my $key = undef;
         {
-            my $url = "http://www.nextmuni.com/googleMap/googleMap.jsp?a=".$agency;
+            my $url = "http://www.nextbus.com/googleMap/googleMap.jsp?a=".$agency;
             my $req = HTTP::Request->new(GET => $url);
             my $res = $ua->request($req);
             my $set_cookie = $res->header('Set-Cookie');
@@ -120,10 +120,10 @@ sub refresh_predictions {
 
         push @args, "key=$key";
 
-        my $url = "http://www.nextmuni.com/s/COM.NextBus.Servlets.XMLFeed?command=predictionsForMultiStops&a=".$agency."&".join("&", @args);
+        my $url = "http://www.nextbus.com/s/COM.NextBus.Servlets.XMLFeed?command=predictionsForMultiStops&a=".$agency."&".join("&", @args);
 
         my $req = HTTP::Request->new(GET => $url);
-        $req->header('Referer' => 'http://www.nextmuni.com/googleMap/googleMap.jsp');
+        $req->header('Referer' => 'http://www.nextbus.com/googleMap/googleMap.jsp');
         $req->header('Cookie' => 'JSESSIONID='.$cookie);
 
         my $res = $ua->request($req);
