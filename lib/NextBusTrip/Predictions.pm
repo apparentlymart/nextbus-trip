@@ -81,6 +81,10 @@ sub refresh_predictions {
 
         my @items = @{$to_refresh{$agency}};
 
+        # HACK: An agency of "(special)" is used to mark things
+        # that aren't walking nor buses, such as bike rides.
+        next if $agency eq '(special)';
+
         # HACK: For now, special case BART to use the "bart" method,
         # and chuck everything else through NextBus. In future
         # this should be configured in the database rather than
