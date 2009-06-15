@@ -81,11 +81,19 @@ sub refresh_predictions {
 
         my @items = @{$to_refresh{$agency}};
 
-        $class->refresh_predictions_nextbus($agency, @items);
+        # HACK: For now, special case BART to use the "bart" method,
+        # and chuck everything else through NextBus. In future
+        # this should be configured in the database rather than
+        # hard-coded here.
+
+        unless ($agency eq 'bart') {
+            $class->refresh_predictions_nextbus($agency, @items);
+        }
+        else {
+            $class->refresh_predictions_bart($agency, @items);
+        }
 
     }
-
-
 
 }
 
@@ -181,6 +189,57 @@ sub refresh_predictions_nextbus {
         warn "Failed to retrieve NextBus predictions: ".$res->status_line;
     }
 
+}
+
+sub refresh_predictions_bart {
+    my ($class, $agency, @items) = @_;
+
+    unless ($agency eq 'bart') {
+        warn "The bart predictions method only supports the bart agency";
+        return;
+    }
+
+    # BART's predictor only selects by stop, and returns all
+    # routes on one page. Therefore we only care about the
+    # unique stops in our list; we'll do one request for each.
+    # TODO: In future, parallelize this.
+
+    my %stops = map { $_->[1] => 1 } @items;
+    my @stops = keys(%stops);
+
+    foreach my $stop (@stops) {
+        my $url = "http://bart.gov/schedules/eta/index.aspx?stn=".$stop;
+        my $req = HTTP::Request->new(GET => $url);
+        my $res = $ua->request($req);
+
+        if ($res->is_success) {
+            my $html = $res->content;
+
+            if ($html =~ m!<table.*?id="real-time-arrivals-wide">(.*?)</table>!s) {
+                my $inner_html = $1;
+
+                while ($inner_html =~ m!<tr.*?>\s*<td>(.*?)</td>\s*<td>(.*?)</td>!sg) {
+                    my $route = $1;
+                    my $predictions = $2;
+
+                    my @predictions = ();
+                    while ($predictions =~ m!(\d+)\s+min!sg) {
+                        my $minutes = $1;
+                        my $seconds = $minutes * 60;
+                        push @predictions, [ time() + $seconds, 'BART' ];
+                    }
+
+                    $predictions{$agency}{"$route\t$stop"} = \@predictions;
+                }
+            }
+            else {
+                warn "Failed to find the predictions table in BART's HTML for stop $stop";
+            }
+        }
+        else {
+            warn "Failed to fetch BART predictions for stop $stop: ".$res->status_line;
+        }
+    }
 }
 
 1;
