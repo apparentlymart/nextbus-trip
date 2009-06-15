@@ -92,11 +92,17 @@ sub refresh_predictions {
         # First we need to hit the map frontend URL in order to get a
         # session cookie that the server will allow to fetch the data.
         my $cookie = undef;
+        my $key = undef;
         {
             my $url = "http://www.nextmuni.com/googleMap/googleMap.jsp?a=".$agency;
             my $req = HTTP::Request->new(GET => $url);
             my $res = $ua->request($req);
             my $set_cookie = $res->header('Set-Cookie');
+
+            unless ($res->is_success) {
+                warn "Failed to load Google Map page for agency $agency";
+                next;
+            }
 
             if ($set_cookie && $set_cookie =~ m!JSESSIONID=(\w+)!) {
                 $cookie = $1;
@@ -105,7 +111,14 @@ sub refresh_predictions {
                 warn "Failed to obtain NextBus session cookie for agency $agency";
                 next;
             }
+
+            my $content = $res->content;
+            if ($content && $content =~ m!keyForNextTime="?(\d+)"?;!) {
+                $key = $1;
+            }
         }
+
+        push @args, "key=$key";
 
         my $url = "http://www.nextmuni.com/s/COM.NextBus.Servlets.XMLFeed?command=predictionsForMultiStops&a=".$agency."&".join("&", @args);
 
